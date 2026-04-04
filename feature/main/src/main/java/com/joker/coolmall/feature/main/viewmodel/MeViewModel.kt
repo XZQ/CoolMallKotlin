@@ -83,8 +83,11 @@ class MeViewModel @Inject constructor(
      * @author Joker.X
      */
     fun getUserOrderStatistics() {
-        // 只有已经登录了才去请求订单统计数据
-        if (!appState.isLoggedIn.value) return
+        // 只有已经登录了才去请求订单统计数据，否则清空
+        if (!appState.isLoggedIn.value) {
+            _orderCount.value = OrderCount()
+            return
+        }
         ResultHandler.handleResultWithData(
             scope = viewModelScope,
             flow = orderRepository.getUserOrderCount().asResult(),
