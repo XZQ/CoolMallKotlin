@@ -17,6 +17,11 @@ class PrivacyPolicyViewModel @Inject constructor(
     private val commonRepository: CommonRepository
 ) : BaseNetWorkViewModel<String>() {
 
+    /**
+     * 启用最少加载时间
+     */
+    override val enableMinLoadingTime: Boolean = true
+
     init {
         super.executeRequest()
     }

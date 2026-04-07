@@ -29,6 +29,12 @@ class OrderLogisticsViewModel @AssistedInject constructor(
     @Assisted navKey: OrderRoutes.Logistics,
     private val orderRepository: OrderRepository,
 ) : BaseNetWorkViewModel<Order>() {
+
+    /**
+     * 启用最少加载时间
+     */
+    override val enableMinLoadingTime: Boolean = true
+
     // 从路由获取订单ID
     private val requiredOrderId: Long = navKey.orderId
 

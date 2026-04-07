@@ -57,6 +57,7 @@ import com.joker.coolmall.core.ui.component.text.TextSize
 import com.joker.coolmall.core.ui.component.text.TextType
 import com.joker.coolmall.core.ui.component.title.TitleWithLine
 import com.joker.coolmall.feature.order.R
+import com.joker.coolmall.feature.order.skeleton.OrderConfirmLoadingSkeleton
 import com.joker.coolmall.feature.order.viewmodel.OrderConfirmViewModel
 import com.joker.coolmall.core.ui.R as CoreUiR
 
@@ -166,7 +167,7 @@ internal fun OrderConfirmScreen(
         ) {
             BaseNetWorkView(
                 uiState = uiState,
-                customLoading = { FullScreenBox { PageLoading() } },
+                customLoading = { OrderConfirmLoadingSkeleton() },
                 customError = { EmptyNetwork(onRetryClick = onRetry) }
             ) {
                 OrderConfirmContentView(

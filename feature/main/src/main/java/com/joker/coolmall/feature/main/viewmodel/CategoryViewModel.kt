@@ -1,16 +1,15 @@
 package com.joker.coolmall.feature.main.viewmodel
 
-import androidx.lifecycle.viewModelScope
-import com.joker.coolmall.core.common.base.viewmodel.BaseViewModel
+import com.joker.coolmall.core.common.base.viewmodel.BaseNetWorkViewModel
 import com.joker.coolmall.core.data.repository.GoodsRepository
 import com.joker.coolmall.core.model.entity.Category
 import com.joker.coolmall.core.model.entity.CategoryTree
-import com.joker.coolmall.feature.main.state.CategoryUiState
-import com.joker.coolmall.result.ResultHandler
-import com.joker.coolmall.result.asResult
+import com.joker.coolmall.core.model.response.NetworkResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 /**
@@ -22,14 +21,11 @@ import javax.inject.Inject
 @HiltViewModel
 class CategoryViewModel @Inject constructor(
     private val goodsRepository: GoodsRepository
-) : BaseViewModel() {
-
+) : BaseNetWorkViewModel<List<CategoryTree>>() {
     /**
-     * 分类UI状态
+     * 启用最少加载时间
      */
-    private val _categoryUiState = MutableStateFlow<CategoryUiState>(CategoryUiState.Loading)
-    val categoryUiState: StateFlow<CategoryUiState> = _categoryUiState
-
+    override val enableMinLoadingTime: Boolean = true
     /**
      * 当前选中的左侧分类索引
      */
@@ -37,7 +33,23 @@ class CategoryViewModel @Inject constructor(
     val selectedCategoryIndex: StateFlow<Int> = _selectedCategoryIndex
 
     init {
-        loadCategoryData()
+        executeRequest()
+    }
+
+    /**
+     * 分类数据请求流
+     *
+     * @return 分类树响应流
+     * @author Joker.X
+     */
+    override fun requestApiFlow(): Flow<NetworkResponse<List<CategoryTree>>> {
+        return goodsRepository.getGoodsTypeList().map { response ->
+            NetworkResponse(
+                data = response.data?.let(::convertToTree) ?: emptyList(),
+                code = response.code,
+                message = response.message,
+            )
+        }
     }
 
     /**
@@ -46,28 +58,7 @@ class CategoryViewModel @Inject constructor(
      * @author Joker.X
      */
     fun loadCategoryData() {
-        ResultHandler.handleResultWithData(
-            scope = viewModelScope,
-            flow = goodsRepository.getGoodsTypeList().asResult(),
-            showToast = true,
-            onLoading = { _categoryUiState.value = CategoryUiState.Loading },
-            onData = { data ->
-                val categoryTree = convertToTree(data)
-                _categoryUiState.value = CategoryUiState.Success(categoryTree)
-            },
-            onError = { message, exception ->
-                _categoryUiState.value = CategoryUiState.Error()
-            }
-        )
-    }
-
-    /**
-     * 重试加载分类数据
-     *
-     * @author Joker.X
-     */
-    fun retryRequest() {
-        loadCategoryData()
+        executeRequest()
     }
 
     /**

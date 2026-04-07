@@ -47,6 +47,12 @@ class OrderDetailViewModel @AssistedInject constructor(
     private val orderRepository: OrderRepository,
     private val commonRepository: CommonRepository
 ) : BaseNetWorkViewModel<Order>() {
+
+    /**
+     * 启用最少加载时间
+     */
+    override val enableMinLoadingTime: Boolean = true
+
     /**
      * 刷新结果监听任务
      */
@@ -120,7 +126,7 @@ class OrderDetailViewModel @AssistedInject constructor(
      */
     override fun onRequestSuccess(data: Order) {
         _cartList.value = convertOrderGoodsToCart(data)
-        super.setSuccessState(data)
+        super.onRequestSuccess(data)
     }
 
     /**

@@ -52,6 +52,11 @@ class OrderConfirmViewModel @Inject constructor(
 ) : BaseNetWorkViewModel<ConfirmOrder>() {
 
     /**
+     * 启用最少加载时间
+     */
+    override val enableMinLoadingTime: Boolean = true
+
+    /**
      * 订单备注状态
      */
     private val _remark = MutableStateFlow("")

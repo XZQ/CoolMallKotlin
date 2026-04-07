@@ -51,9 +51,29 @@ class OrderListViewModel @AssistedInject constructor(
     private val commonRepository: CommonRepository,
 ) : BaseViewModel() {
     /**
+     * 首次进入页面的最少加载时间
+     */
+    private val minInitialLoadingTime = 320L
+
+    /**
      * 刷新结果监听任务
      */
     private var refreshObserveJob: Job? = null
+
+    /**
+     * 首次进入页面触发加载的标签索引
+     */
+    private val initialTabIndex: Int
+
+    /**
+     * 首次进入页面最少加载时间是否已消费
+     */
+    private var initialLoadingConsumed = false
+
+    /**
+     * 首次进入页面请求开始时间
+     */
+    private var initialLoadingStartTime = 0L
 
     /**
      * 当前选中的标签索引
@@ -198,6 +218,8 @@ class OrderListViewModel @AssistedInject constructor(
             }
         }
 
+        initialTabIndex = _selectedTabIndex.value
+
         // 加载当前选中标签页的数据
         observeRefreshState()
         loadTabDataIfNeeded(_selectedTabIndex.value)
@@ -283,8 +305,14 @@ class OrderListViewModel @AssistedInject constructor(
      * 加载指定标签页的列表数据
      */
     private fun loadListData(tabIndex: Int) {
+        val isInitialScreenLoading = isInitialScreenLoading(tabIndex)
+
         // 设置UI状态 - 仅首次加载显示加载中状态
-        if (_loadMoreStates[tabIndex].value == LoadMoreState.Loading && pageIndices[tabIndex] == 1) {
+        if (isInitialScreenLoading) {
+            initialLoadingStartTime = System.currentTimeMillis()
+            _uiStates[tabIndex].value = BaseNetWorkListUiState.Loading
+            _loadMoreStates[tabIndex].value = LoadMoreState.Loading
+        } else if (_loadMoreStates[tabIndex].value == LoadMoreState.Loading && pageIndices[tabIndex] == 1) {
             _uiStates[tabIndex].value = BaseNetWorkListUiState.Loading
         }
 
@@ -299,10 +327,10 @@ class OrderListViewModel @AssistedInject constructor(
                 )
             ).asResult(),
             onSuccess = { response ->
-                handleSuccess(tabIndex, response.data)
+                handleSuccess(tabIndex, response.data, isInitialScreenLoading)
             },
             onError = { message, exception ->
-                handleError(tabIndex, message, exception)
+                handleError(tabIndex, message, exception, isInitialScreenLoading)
             }
         )
     }
@@ -310,7 +338,11 @@ class OrderListViewModel @AssistedInject constructor(
     /**
      * 处理成功响应
      */
-    private fun handleSuccess(tabIndex: Int, data: NetworkPageData<Order>?) {
+    private fun handleSuccess(
+        tabIndex: Int,
+        data: NetworkPageData<Order>?,
+        isInitialScreenLoading: Boolean,
+    ) {
         val newList = data?.list ?: emptyList()
         val pagination = data?.pagination
 
@@ -328,17 +360,20 @@ class OrderListViewModel @AssistedInject constructor(
 
         when {
             pageIndices[tabIndex] == 1 -> {
-                // 刷新或首次加载 - 重置列表
-                _listDataMap[tabIndex].value = newList
-                _refreshingStates[tabIndex].value = false
+                viewModelScope.launch {
+                    applyInitialLoadingDelayIfNeeded(isInitialScreenLoading)
 
-                // 更新加载状态
-                if (newList.isEmpty()) {
-                    _uiStates[tabIndex].value = BaseNetWorkListUiState.Empty
-                } else {
-                    _uiStates[tabIndex].value = BaseNetWorkListUiState.Success
-                    _loadMoreStates[tabIndex].value =
-                        if (hasNextPage) LoadMoreState.PullToLoad else LoadMoreState.NoMore
+                    _listDataMap[tabIndex].value = newList
+                    _refreshingStates[tabIndex].value = false
+
+                    if (newList.isEmpty()) {
+                        _uiStates[tabIndex].value = BaseNetWorkListUiState.Empty
+                        _loadMoreStates[tabIndex].value = LoadMoreState.PullToLoad
+                    } else {
+                        _uiStates[tabIndex].value = BaseNetWorkListUiState.Success
+                        _loadMoreStates[tabIndex].value =
+                            if (hasNextPage) LoadMoreState.PullToLoad else LoadMoreState.NoMore
+                    }
                 }
             }
 
@@ -358,20 +393,62 @@ class OrderListViewModel @AssistedInject constructor(
     /**
      * 处理错误响应
      */
-    private fun handleError(tabIndex: Int, message: String?, exception: Throwable?) {
-        _refreshingStates[tabIndex].value = false
+    private fun handleError(
+        tabIndex: Int,
+        message: String?,
+        exception: Throwable?,
+        isInitialScreenLoading: Boolean,
+    ) {
+        viewModelScope.launch {
+            applyInitialLoadingDelayIfNeeded(isInitialScreenLoading)
+            _refreshingStates[tabIndex].value = false
 
-        if (pageIndices[tabIndex] == 1) {
-            // 首次加载或刷新失败
-            if (_listDataMap[tabIndex].value.isEmpty()) {
-                _uiStates[tabIndex].value = BaseNetWorkListUiState.Error
+            if (pageIndices[tabIndex] == 1) {
+                // 首次加载或刷新失败
+                if (_listDataMap[tabIndex].value.isEmpty()) {
+                    _uiStates[tabIndex].value = BaseNetWorkListUiState.Error
+                }
+                _loadMoreStates[tabIndex].value = LoadMoreState.PullToLoad
+            } else {
+                // 加载更多失败，回退页码
+                pageIndices[tabIndex]--
+                _loadMoreStates[tabIndex].value = LoadMoreState.Error
             }
-            _loadMoreStates[tabIndex].value = LoadMoreState.PullToLoad
-        } else {
-            // 加载更多失败，回退页码
-            pageIndices[tabIndex]--
-            _loadMoreStates[tabIndex].value = LoadMoreState.Error
         }
+    }
+
+    /**
+     * 判断是否为首次进入页面的初始加载
+     *
+     * @param tabIndex 标签页索引
+     * @return 是否命中初始加载场景
+     * @author Joker.X
+     */
+    private fun isInitialScreenLoading(tabIndex: Int): Boolean {
+        return !initialLoadingConsumed &&
+                tabIndex == initialTabIndex &&
+                pageIndices[tabIndex] == 1 &&
+                _listDataMap[tabIndex].value.isEmpty() &&
+                !_refreshingStates[tabIndex].value
+    }
+
+    /**
+     * 应用首次进入页面的最少加载时间
+     *
+     * @param isInitialScreenLoading 是否命中初始加载场景
+     * @author Joker.X
+     */
+    private suspend fun applyInitialLoadingDelayIfNeeded(isInitialScreenLoading: Boolean) {
+        if (!isInitialScreenLoading || initialLoadingConsumed) {
+            return
+        }
+
+        val elapsedTime = System.currentTimeMillis() - initialLoadingStartTime
+        val remainingTime = (minInitialLoadingTime - elapsedTime).coerceAtLeast(0L)
+        if (remainingTime > 0) {
+            delay(remainingTime)
+        }
+        initialLoadingConsumed = true
     }
 
     /**

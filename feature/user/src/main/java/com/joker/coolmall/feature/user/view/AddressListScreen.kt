@@ -26,6 +26,7 @@ import com.joker.coolmall.core.ui.component.network.BaseNetWorkListView
 import com.joker.coolmall.core.ui.component.refresh.RefreshLayout
 import com.joker.coolmall.core.ui.component.scaffold.AppScaffold
 import com.joker.coolmall.feature.user.R
+import com.joker.coolmall.feature.user.skeleton.AddressListLoadingSkeleton
 import com.joker.coolmall.feature.user.viewmodel.AddressListViewModel
 
 /**
@@ -123,7 +124,10 @@ internal fun AddressListScreen(
         }) {
         BaseNetWorkListView(
             uiState = uiState,
-            onRetry = onRetry
+            onRetry = onRetry,
+            customLoading = {
+                AddressListLoadingSkeleton()
+            }
         ) {
             AddressListContentView(
                 data = listData,

@@ -59,6 +59,7 @@ import com.joker.coolmall.feature.order.R
 import com.joker.coolmall.feature.order.component.OrderButtons
 import com.joker.coolmall.feature.order.model.OrderStatus
 import com.joker.coolmall.feature.order.model.OrderTabState
+import com.joker.coolmall.feature.order.skeleton.OrderListLoadingSkeleton
 import com.joker.coolmall.feature.order.viewmodel.OrderListViewModel
 import kotlinx.coroutines.launch
 
@@ -393,7 +394,8 @@ private fun OrderListContentView(
             // 使用 BaseNetWorkListView 包裹每个标签页
             BaseNetWorkListView(
                 uiState = tabState.uiState,
-                onRetry = tabState.onRetry
+                onRetry = tabState.onRetry,
+                customLoading = { OrderListLoadingSkeleton() }
             ) {
                 // 标签页的内容
                 OrderTabContent(

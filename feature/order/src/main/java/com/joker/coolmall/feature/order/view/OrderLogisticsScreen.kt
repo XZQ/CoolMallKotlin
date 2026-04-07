@@ -36,6 +36,7 @@ import com.joker.coolmall.core.ui.component.text.TextType
 import com.joker.coolmall.core.ui.component.title.TitleWithLine
 import com.joker.coolmall.feature.order.R
 import com.joker.coolmall.feature.order.component.LogisticsSteps
+import com.joker.coolmall.feature.order.skeleton.OrderLogisticsLoadingSkeleton
 import com.joker.coolmall.feature.order.viewmodel.OrderLogisticsViewModel
 
 /**
@@ -86,7 +87,10 @@ internal fun OrderLogisticsScreen(
     ) {
         BaseNetWorkView(
             uiState = uiState,
-            onRetry = onRetry
+            onRetry = onRetry,
+            customLoading = {
+                OrderLogisticsLoadingSkeleton()
+            }
         ) { order ->
             OrderLogisticsContentView(
                 order = order,

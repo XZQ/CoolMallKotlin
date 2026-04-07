@@ -22,6 +22,10 @@ import javax.inject.Inject
 class CouponViewModel @Inject constructor(
     private val couponRepository: CouponRepository,
 ) : BaseNetWorkListViewModel<Coupon>() {
+    /**
+     * 启用最少加载时间
+     */
+    override val enableMinLoadingTime: Boolean = true
 
     init {
         initLoad()

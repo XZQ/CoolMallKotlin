@@ -162,20 +162,20 @@ object TimeUtils {
             return false
         }
 
-        // 如果是最后一条消息（最早的消息），且消息数量大于等于3条时才显示时间头部
-        // 这样可以避免在消息很少时显示不必要的时间头部
-        if (currentIndex == messages.size - 1) {
-            return messages.size >= 3
+        // 列表为倒序数据 + reverseLayout，index 0 对应视觉上的最后一条消息
+        // 末尾消息后方不存在可分组的下一条消息，不显示尾部时间头部
+        if (currentIndex == 0) {
+            return false
         }
 
-        // 对于其他位置的消息，检查与下一条消息的时间间隔
-        val nextMessage = messages[currentIndex + 1]
+        // 对于其他位置的消息，检查与更早一条消息的时间间隔
+        val previousMessage = messages[currentIndex - 1]
 
         // 判断当前消息和下一条消息之间是否需要显示时间分隔
-        // 注意：由于列表是倒序的，所以nextMessage实际上是时间上更早的消息
+        // 注意：由于列表是倒序的，previousMessage 在视觉上位于当前消息之后
         return shouldShowTimeHeader(
             currentTimeString = currentMessage.createTime,
-            previousTimeString = nextMessage.createTime
+            previousTimeString = previousMessage.createTime
         )
     }
 }

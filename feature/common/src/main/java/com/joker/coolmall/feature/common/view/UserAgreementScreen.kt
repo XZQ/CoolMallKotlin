@@ -1,7 +1,9 @@
 package com.joker.coolmall.feature.common.view
 
+import android.os.Build
 import android.view.ViewGroup
 import android.webkit.WebView
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +20,7 @@ import com.joker.coolmall.navigation.navigateBack
 import com.joker.coolmall.core.ui.component.network.BaseNetWorkView
 import com.joker.coolmall.core.ui.component.scaffold.AppScaffold
 import com.joker.coolmall.feature.common.R
+import com.joker.coolmall.feature.common.skeleton.DocumentLoadingSkeleton
 import com.joker.coolmall.feature.common.viewmodel.UserAgreementViewModel
 
 /**
@@ -26,6 +29,7 @@ import com.joker.coolmall.feature.common.viewmodel.UserAgreementViewModel
  * @param viewModel 用户协议 ViewModel
  * @author Joker.X
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 internal fun UserAgreementRoute(
     viewModel: UserAgreementViewModel = hiltViewModel()
@@ -46,6 +50,7 @@ internal fun UserAgreementRoute(
  * @param onRetry 重试请求回调
  * @author Joker.X
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun UserAgreementScreen(
@@ -59,7 +64,10 @@ internal fun UserAgreementScreen(
     ) {
         BaseNetWorkView(
             uiState = uiState,
-            onRetry = onRetry
+            onRetry = onRetry,
+            customLoading = {
+                DocumentLoadingSkeleton()
+            },
         ) { html ->
             UserAgreementContentView(html = html)
         }
@@ -72,6 +80,7 @@ internal fun UserAgreementScreen(
  * @param html HTML内容
  * @author Joker.X
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun UserAgreementContentView(html: String) {
     AndroidView(
@@ -116,6 +125,7 @@ private fun UserAgreementContentView(html: String) {
  *
  * @author Joker.X
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 internal fun UserAgreementScreenPreview() {
@@ -133,6 +143,7 @@ internal fun UserAgreementScreenPreview() {
  *
  * @author Joker.X
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 internal fun UserAgreementScreenPreviewDark() {

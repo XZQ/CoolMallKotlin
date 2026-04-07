@@ -121,6 +121,7 @@ import com.joker.coolmall.core.ui.component.text.TextSize
 import com.joker.coolmall.core.ui.component.title.TitleWithLine
 import com.joker.coolmall.feature.goods.R
 import com.joker.coolmall.feature.goods.component.CommentItem
+import com.joker.coolmall.feature.goods.skeleton.GoodsDetailLoadingSkeleton
 import com.joker.coolmall.feature.goods.viewmodel.GoodsDetailViewModel
 import kotlinx.coroutines.flow.collectLatest
 import com.joker.coolmall.core.ui.R as CoreUiR
@@ -230,7 +231,10 @@ internal fun GoodsDetailScreen(
         BaseNetWorkView(
             uiState = uiState,
             padding = paddingValues,
-            onRetry = onRetry
+            onRetry = onRetry,
+            customLoading = {
+                GoodsDetailLoadingSkeleton()
+            }
         ) { goodsDetail ->
             GoodsDetailContentView(
                 data = goodsDetail,

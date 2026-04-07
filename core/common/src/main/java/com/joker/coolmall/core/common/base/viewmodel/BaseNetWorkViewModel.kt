@@ -49,7 +49,7 @@ abstract class BaseNetWorkViewModel<T> : BaseViewModel() {
     protected open val showErrorToast: Boolean = false
 
     /**
-     * 是否启用最少加载时间（240毫秒）
+     * 是否启用最少加载时间（320毫秒）
      * 子类可重写此属性以启用最少加载时间功能
      */
     protected open val enableMinLoadingTime: Boolean = false
@@ -97,7 +97,7 @@ abstract class BaseNetWorkViewModel<T> : BaseViewModel() {
     protected open fun onRequestSuccess(data: T) {
         if (enableMinLoadingTime) {
             val elapsedTime = System.currentTimeMillis() - requestStartTime
-            val minLoadingTime = 240L
+            val minLoadingTime = 320L
 
             if (elapsedTime < minLoadingTime) {
                 // 延迟设置成功状态

@@ -87,6 +87,7 @@ import com.joker.coolmall.core.util.time.TimeUtils
 import com.joker.coolmall.feature.cs.R
 import com.joker.coolmall.feature.cs.component.ChatInputArea
 import com.joker.coolmall.feature.cs.component.ChatLoadMore
+import com.joker.coolmall.feature.cs.skeleton.ChatLoadingSkeleton
 import com.joker.coolmall.feature.cs.viewmodel.ChatViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -190,6 +191,7 @@ internal fun ChatScreen(
             uiState = uiState,
             padding = paddingValues,
             onRetry = onRefresh,
+            customLoading = { ChatLoadingSkeleton() },
         ) {
             ChatContentView(
                 messages = messages,

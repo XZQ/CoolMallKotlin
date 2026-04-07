@@ -34,6 +34,10 @@ class FeedbackListViewModel @Inject constructor(
     private val feedbackRepository: FeedbackRepository,
     private val commonRepository: CommonRepository
 ) : BaseNetWorkListViewModel<Feedback>() {
+    /**
+     * 启用最少加载时间
+     */
+    override val enableMinLoadingTime: Boolean = true
 
     // 反馈类型字典数据
     private val _feedbackTypes = MutableStateFlow<List<DictItem>>(emptyList())

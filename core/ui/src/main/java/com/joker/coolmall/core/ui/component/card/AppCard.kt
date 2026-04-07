@@ -31,9 +31,11 @@ fun AppCard(
     lineTitle: Any? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Card {
+    Card(
+        modifier = modifier,
+    ) {
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(SpacePaddingMedium)
         ) {

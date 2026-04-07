@@ -18,6 +18,7 @@ import com.joker.coolmall.result.ResultHandler
 import com.joker.coolmall.result.asResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -45,6 +46,10 @@ class ChatViewModel @Inject constructor(
     private val appState: AppState,
     @param:ApplicationContext private val context: Context,
 ) : BaseViewModel() {
+    /**
+     * 首次页面加载最少展示时间
+     */
+    private val minLoadingTime = 320L
 
     // 页面UI状态
     private val _uiState = MutableStateFlow<BaseNetWorkUiState<Unit>>(BaseNetWorkUiState.Loading)
@@ -92,6 +97,11 @@ class ChatViewModel @Inject constructor(
     // 音效管理器
     private val chatSoundManager = ChatSoundManager(context)
 
+    /**
+     * 页面加载开始时间
+     */
+    private var loadingStartTime = 0L
+
     init {
         // 设置WebSocket回调
         setupWebSocketCallbacks()
@@ -121,6 +131,7 @@ class ChatViewModel @Inject constructor(
      * @author Joker.X
      */
     private fun createSession() {
+        beginLoading()
         LogUtils.d(TAG, "开始创建会话")
 
         ResultHandler.handleResultWithData(
@@ -130,22 +141,22 @@ class ChatViewModel @Inject constructor(
                 _sessionId.value = session.id
                 LogUtils.d(TAG, "会话创建成功: sessionId = ${session.id}")
 
-                // 设置成功状态
-                _uiState.value = BaseNetWorkUiState.Success(Unit)
-
-                // 获取历史消息
-                loadHistoryMessages()
-
                 // 建立WebSocket连接
                 connectWebSocket()
+
+                // 获取历史消息
+                loadHistoryMessages(isInitialLoad = true)
 
                 // 标记消息为已读
                 markMessagesAsRead()
             },
             onError = { message, exception ->
                 LogUtils.e(TAG, "会话创建失败: $message")
-                _uiState.value = BaseNetWorkUiState.Error(message, exception)
-                _connectionState.value = WebSocketConnectionState.Error("创建会话失败")
+                viewModelScope.launch {
+                    applyMinLoadingDelay()
+                    _uiState.value = BaseNetWorkUiState.Error(message, exception)
+                    _connectionState.value = WebSocketConnectionState.Error("创建会话失败")
+                }
             }
         )
     }
@@ -155,7 +166,7 @@ class ChatViewModel @Inject constructor(
      *
      * @author Joker.X
      */
-    fun loadHistoryMessages() {
+    fun loadHistoryMessages(isInitialLoad: Boolean = false) {
         if (_isLoadingHistory.value) return
 
         val sessionId = _sessionId.value
@@ -208,11 +219,18 @@ class ChatViewModel @Inject constructor(
 
                 _isLoadingHistory.value = false
 
+                if (isInitialLoad) {
+                    viewModelScope.launch {
+                        applyMinLoadingDelay()
+                        _uiState.value = BaseNetWorkUiState.Success(Unit)
+                    }
+                }
+
                 // 更新加载更多状态
                 _loadMoreState.value =
                     if (hasMoreData) LoadMoreState.PullToLoad else LoadMoreState.NoMore
             },
-            onError = { message, _ ->
+            onError = { message, exception ->
                 LogUtils.e(TAG, "历史消息加载失败: $message")
                 _isLoadingHistory.value = false
 
@@ -220,6 +238,11 @@ class ChatViewModel @Inject constructor(
                     // 加载更多失败，回退页码
                     currentPage--
                     _loadMoreState.value = LoadMoreState.Error
+                } else if (isInitialLoad) {
+                    viewModelScope.launch {
+                        applyMinLoadingDelay()
+                        _uiState.value = BaseNetWorkUiState.Error(message, exception)
+                    }
                 }
             }
         )
@@ -262,7 +285,7 @@ class ChatViewModel @Inject constructor(
      * @author Joker.X
      */
     fun connectWebSocket() {
-        val token = appState?.auth?.value?.token ?: ""
+        val token = appState.auth.value?.token ?: ""
         webSocketManager.connect(token, viewModelScope)
     }
 
@@ -382,10 +405,33 @@ class ChatViewModel @Inject constructor(
      */
     fun retryRequest() {
         if (_uiState.value is BaseNetWorkUiState.Error) {
-            _uiState.value = BaseNetWorkUiState.Loading
+            beginLoading()
         }
         // 重试创建会话
         createSession()
+    }
+
+    /**
+     * 开始页面加载流程
+     *
+     * @author Joker.X
+     */
+    private fun beginLoading() {
+        _uiState.value = BaseNetWorkUiState.Loading
+        loadingStartTime = System.currentTimeMillis()
+    }
+
+    /**
+     * 应用最少加载时间
+     *
+     * @author Joker.X
+     */
+    private suspend fun applyMinLoadingDelay() {
+        val elapsedTime = System.currentTimeMillis() - loadingStartTime
+        val remainingTime = (minLoadingTime - elapsedTime).coerceAtLeast(0L)
+        if (remainingTime > 0L) {
+            delay(remainingTime)
+        }
     }
 
     /**

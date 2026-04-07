@@ -37,6 +37,11 @@ class AddressListViewModel @AssistedInject constructor(
 ) : BaseNetWorkListViewModel<Address>() {
 
     /**
+     * 启用最少加载时间
+     */
+    override val enableMinLoadingTime: Boolean = true
+
+    /**
      * 是否为选择模式
      */
     private val addressListRoute = navKey

@@ -19,6 +19,7 @@ import com.joker.coolmall.core.ui.component.refresh.RefreshLayout
 import com.joker.coolmall.core.ui.component.scaffold.AppScaffold
 import com.joker.coolmall.feature.feedback.R
 import com.joker.coolmall.feature.feedback.component.FeedbackCard
+import com.joker.coolmall.feature.feedback.skeleton.FeedbackListLoadingSkeleton
 import com.joker.coolmall.feature.feedback.viewmodel.FeedbackListViewModel
 
 /**
@@ -94,7 +95,8 @@ internal fun FeedbackListScreen(
     ) {
         BaseNetWorkListView(
             uiState = uiState,
-            onRetry = onRetry
+            onRetry = onRetry,
+            customLoading = { FeedbackListLoadingSkeleton() }
         ) {
             FeedbackListContentView(
                 data = listData,

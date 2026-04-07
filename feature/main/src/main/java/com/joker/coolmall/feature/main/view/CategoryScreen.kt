@@ -45,10 +45,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.joker.coolmall.core.common.base.state.BaseNetWorkUiState
 import com.joker.coolmall.core.designsystem.component.AppColumn
 import com.joker.coolmall.core.designsystem.component.AppLazyColumn
 import com.joker.coolmall.core.designsystem.component.AppRow
-import com.joker.coolmall.core.designsystem.component.FullScreenBox
 import com.joker.coolmall.core.designsystem.theme.AppTheme
 import com.joker.coolmall.core.designsystem.theme.RadiusLarge
 import com.joker.coolmall.core.designsystem.theme.ShapeMedium
@@ -57,13 +57,12 @@ import com.joker.coolmall.core.model.entity.CategoryTree
 import com.joker.coolmall.core.model.preview.previewCategoryTreeList
 import com.joker.coolmall.navigation.goods.GoodsNavigator
 import com.joker.coolmall.core.ui.component.appbar.CenterTopAppBar
-import com.joker.coolmall.core.ui.component.empty.EmptyNetwork
 import com.joker.coolmall.core.ui.component.image.NetWorkImage
-import com.joker.coolmall.core.ui.component.loading.PageLoading
+import com.joker.coolmall.core.ui.component.network.BaseNetWorkView
 import com.joker.coolmall.core.ui.component.title.TitleWithLine
 import com.joker.coolmall.feature.main.R
 import com.joker.coolmall.feature.main.component.CommonScaffold
-import com.joker.coolmall.feature.main.state.CategoryUiState
+import com.joker.coolmall.feature.main.skeleton.CategoryLoadingSkeleton
 import com.joker.coolmall.feature.main.viewmodel.CategoryViewModel
 import kotlinx.coroutines.launch
 
@@ -78,7 +77,7 @@ internal fun CategoryRoute(
     viewModel: CategoryViewModel = hiltViewModel()
 ) {
     // 分类UI状态
-    val uiState by viewModel.categoryUiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     // 当前选中的分类索引
     val selectedIndex by viewModel.selectedCategoryIndex.collectAsState()
 
@@ -102,7 +101,7 @@ internal fun CategoryRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun CategoryScreen(
-    uiState: CategoryUiState = CategoryUiState.Loading,
+    uiState: BaseNetWorkUiState<List<CategoryTree>> = BaseNetWorkUiState.Loading,
     selectedIndex: Int = 0,
     onCategorySelected: (Int) -> Unit = {},
     onRetry: () -> Unit = {}
@@ -112,16 +111,17 @@ internal fun CategoryScreen(
             CenterTopAppBar(R.string.category, showBackIcon = false)
         }
     ) { paddingValues ->
-        FullScreenBox(padding = paddingValues) {
-            when (uiState) {
-                is CategoryUiState.Loading -> PageLoading()
-                is CategoryUiState.Error -> EmptyNetwork(onRetryClick = onRetry)
-                is CategoryUiState.Success -> CategoryContentView(
-                    categoryTrees = uiState.data,
-                    selectedIndex = selectedIndex,
-                    onCategorySelected = onCategorySelected,
-                )
-            }
+        BaseNetWorkView(
+            uiState = uiState,
+            padding = paddingValues,
+            onRetry = onRetry,
+            customLoading = { CategoryLoadingSkeleton() },
+        ) { categoryTrees ->
+            CategoryContentView(
+                categoryTrees = categoryTrees,
+                selectedIndex = selectedIndex,
+                onCategorySelected = onCategorySelected,
+            )
         }
     }
 }
@@ -599,7 +599,7 @@ private val RightTopRoundedShape = RoundedCornerShape(
 fun CategoryScreenPreview() {
     AppTheme {
         CategoryScreen(
-            uiState = CategoryUiState.Success(previewCategoryTreeList),
+            uiState = BaseNetWorkUiState.Success(previewCategoryTreeList),
             selectedIndex = 1,
         )
     }

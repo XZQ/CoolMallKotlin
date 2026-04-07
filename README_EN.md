@@ -132,10 +132,10 @@ to join.
 
 | Category                | Technology                | Version    | Description                            |
 |-------------------------|---------------------------|------------|----------------------------------------|
-| Programming Language    | Kotlin                    | 2.3.10     | 100% Kotlin Development                |
-| UI Framework            | Jetpack Compose           | 2026.02.00 | Declarative UI Framework               |
+| Programming Language    | Kotlin                    | 2.3.20     | 100% Kotlin Development                |
+| UI Framework            | Jetpack Compose           | 2026.03.01 | Declarative UI Framework               |
 | Architecture Pattern    | MVVM + Clean Architecture | -          | MVVM + Clean Architecture              |
-| Dependency Injection    | Hilt                      | 2.59.1     | Dagger-based DI Framework              |
+| Dependency Injection    | Hilt                      | 2.59.2     | Dagger-based DI Framework              |
 | Asynchronous Processing | Coroutines + Flow         | 1.9.0      | Coroutines + Flow Reactive Programming |
 
 ### Functional Modules
@@ -154,14 +154,14 @@ to join.
 | Category      | Technology | Version | Description                        |
 |---------------|------------|---------|------------------------------------|
 | Database      | Room       | 2.8.4   | SQLite Database                    |
-| Local Storage | MMKV       | 2.3.0   | High-performance Key-Value Storage |
+| Local Storage | MMKV       | 2.4.0   | High-performance Key-Value Storage |
 
 ### Development Tools
 
 | Category              | Technology    | Version | Description                |
 |-----------------------|---------------|---------|----------------------------|
 | Logging Framework     | Timber        | 5.0.1   | Log Management             |
-| Network Debugging     | Chucker       | 4.3.0   | Network Request Monitoring |
+| Network Debugging     | Chucker       | 4.3.1   | Network Request Monitoring |
 | Memory Detection      | LeakCanary    | 2.14    | Memory Leak Detection      |
 | Permission Management | XXPermissions | 28.0    | Dynamic Permission Request |
 | Testing Framework     | JUnit         | 4.13.2  | Unit Testing + UI Testing  |
@@ -251,7 +251,7 @@ to join.
 - **Common Module (common)**
     - About Us (about) `UI only`
     - WebView Page (web) `Completed`
-    - App Settings (settings) `UI only`
+    - App Settings (settings) `To be improved`
     - User Agreement (user-agreement) `Completed`
     - Privacy Policy (privacy-policy) `Completed`
     - Contributors List (contributors) `Completed`
@@ -276,7 +276,8 @@ to join.
 │   ├── network/          # Network layer
 │   ├── result/           # Result processing
 │   ├── ui/               # UI components
-│   └── util/             # Utility classes
+│   ├── util/             # Utility classes
+│   └── navigation/       # Navigation
 ├── feature/              # Feature modules
 │   ├── auth/             # Authentication module
 │   ├── common/           # Common module
@@ -288,7 +289,6 @@ to join.
 │   ├── market/           # Marketing module
 │   ├── order/            # Order module
 │   └── user/             # User module
-└── navigation/           # Navigation module
 ```
 
 ## 🚀 Development Plan

@@ -31,6 +31,11 @@ class GoodsCommentViewModel @AssistedInject constructor(
      */
     private val goodsId = navKey.goodsId
 
+    /**
+     * 启用最少加载时间
+     */
+    override val enableMinLoadingTime: Boolean = true
+
     init {
         initLoad()
     }

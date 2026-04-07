@@ -86,6 +86,7 @@ import com.joker.coolmall.core.ui.component.title.TitleWithLine
 import com.joker.coolmall.feature.main.R
 import com.joker.coolmall.feature.main.component.CommonScaffold
 import com.joker.coolmall.feature.main.component.FlashSaleItem
+import com.joker.coolmall.feature.main.skeleton.HomeLoadingSkeleton
 import com.joker.coolmall.feature.main.viewmodel.HomeViewModel
 import com.joker.coolmall.core.ui.R as CoreUiR
 
@@ -193,7 +194,10 @@ internal fun HomeScreen(
         BaseNetWorkListView(
             uiState = uiState,
             padding = it,
-            onRetry = onRetry
+            onRetry = onRetry,
+            customLoading = {
+                HomeLoadingSkeleton()
+            }
         ) {
             HomeContentView(
                 data = pageData,

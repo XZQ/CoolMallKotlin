@@ -72,7 +72,7 @@ abstract class BaseNetWorkListViewModel<T : Any> : BaseViewModel() {
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     /**
-     * 是否启用最少加载时间（240毫秒）
+     * 是否启用最少加载时间（320毫秒）
      * 子类可重写此属性以启用最少加载时间功能
      */
     protected open val enableMinLoadingTime: Boolean = false
@@ -100,8 +100,7 @@ abstract class BaseNetWorkListViewModel<T : Any> : BaseViewModel() {
      * 加载列表数据
      */
     protected fun loadListData() {
-
-        val isFirstLoading = _loadMoreState.value == LoadMoreState.Loading && currentPage == 1
+        val isFirstLoading = currentPage == 1 && _listData.value.isEmpty() && !_isRefreshing.value
 
         // 记录请求开始时间（仅首次加载）并且启用最少加载时间功能
         if (isFirstLoading && enableMinLoadingTime) {
@@ -111,6 +110,7 @@ abstract class BaseNetWorkListViewModel<T : Any> : BaseViewModel() {
         // 设置UI状态 - 仅首次加载显示加载中状态
         if (isFirstLoading) {
             _uiState.value = BaseNetWorkListUiState.Loading
+            _loadMoreState.value = LoadMoreState.Loading
         }
 
         ResultHandler.handleResult(
@@ -154,7 +154,7 @@ abstract class BaseNetWorkListViewModel<T : Any> : BaseViewModel() {
                 // 判断是否需要最少加载时间延迟
                 if (enableMinLoadingTime) {
                     val elapsedTime = System.currentTimeMillis() - requestStartTime
-                    val minLoadingTime = 240L
+                    val minLoadingTime = 320L
 
                     if (elapsedTime < minLoadingTime) {
                         // 延迟设置成功状态

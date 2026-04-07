@@ -17,6 +17,7 @@ import com.joker.coolmall.core.ui.component.coupon.CouponCardMode
 import com.joker.coolmall.core.ui.component.network.BaseNetWorkListView
 import com.joker.coolmall.core.ui.component.refresh.RefreshLayout
 import com.joker.coolmall.core.ui.component.scaffold.AppScaffold
+import com.joker.coolmall.feature.market.skeleton.CouponLoadingSkeleton
 import com.joker.coolmall.feature.market.viewmodel.CouponViewModel
 
 /**
@@ -84,7 +85,8 @@ internal fun CouponScreen(
     ) {
         BaseNetWorkListView(
             uiState = uiState,
-            onRetry = onRetry
+            onRetry = onRetry,
+            customLoading = { CouponLoadingSkeleton() }
         ) {
             CouponContentView(
                 data = listData,

@@ -45,6 +45,7 @@ import com.joker.coolmall.core.ui.component.text.TextType
 import com.joker.coolmall.core.ui.component.title.TitleWithLine
 import com.joker.coolmall.feature.order.R
 import com.joker.coolmall.feature.order.component.OrderButtons
+import com.joker.coolmall.feature.order.skeleton.OrderDetailLoadingSkeleton
 import com.joker.coolmall.feature.order.viewmodel.OrderDetailViewModel
 import com.joker.coolmall.core.ui.R as CoreUiR
 
@@ -203,7 +204,7 @@ internal fun OrderDetailScreen(
         title = if (uiState is BaseNetWorkUiState.Success) {
             titleResId
         } else {
-            null
+            R.string.order_detail
         },
         onBackClick = onBackClick,
         bottomBar = {
@@ -235,7 +236,10 @@ internal fun OrderDetailScreen(
     ) {
         BaseNetWorkView(
             uiState = uiState,
-            onRetry = onRetry
+            onRetry = onRetry,
+            customLoading = {
+                OrderDetailLoadingSkeleton()
+            }
         ) { order ->
             OrderDetailContentView(
                 data = order,

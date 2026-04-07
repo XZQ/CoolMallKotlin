@@ -23,10 +23,12 @@ import com.joker.coolmall.core.util.toast.ToastUtils
 import com.joker.coolmall.result.ResultHandler
 import com.joker.coolmall.result.asResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -44,6 +46,15 @@ class HomeViewModel @Inject constructor(
     private val goodsRepository: GoodsRepository,
     private val couponRepository: CouponRepository
 ) : BaseNetWorkListViewModel<Goods>() {
+    /**
+     * 首页首次加载最小时长
+     */
+    private val minHomeLoadingTime = 320L
+
+    /**
+     * 首页首次加载开始时间
+     */
+    private var homeRequestStartTime = 0L
 
     /**
      * 页面数据
@@ -82,6 +93,14 @@ class HomeViewModel @Inject constructor(
      * @author Joker.X
      */
     fun loadHomeData() {
+        val isFirstLoading = currentPage == 1 && _listData.value.isEmpty() && !_isRefreshing.value
+
+        if (isFirstLoading) {
+            homeRequestStartTime = System.currentTimeMillis()
+            super._uiState.value = BaseNetWorkListUiState.Loading
+            _loadMoreState.value = LoadMoreState.Loading
+        }
+
         ResultHandler.handleResult(
             showToast = false,
             scope = viewModelScope,
@@ -98,8 +117,20 @@ class HomeViewModel @Inject constructor(
                     if (response.data?.goods?.isNotEmpty() == true) LoadMoreState.PullToLoad
                     else LoadMoreState.NoMore
 
-                // 设置初始状态
-                super._uiState.value = BaseNetWorkListUiState.Success
+                if (isFirstLoading) {
+                    val elapsedTime = System.currentTimeMillis() - homeRequestStartTime
+
+                    if (elapsedTime < minHomeLoadingTime) {
+                        viewModelScope.launch {
+                            delay(minHomeLoadingTime - elapsedTime)
+                            super._uiState.value = BaseNetWorkListUiState.Success
+                        }
+                    } else {
+                        super._uiState.value = BaseNetWorkListUiState.Success
+                    }
+                } else {
+                    super._uiState.value = BaseNetWorkListUiState.Success
+                }
 
             },
             onError = { _, _ ->

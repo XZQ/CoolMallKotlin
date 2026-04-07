@@ -58,6 +58,7 @@ import com.joker.coolmall.feature.goods.R
 import com.joker.coolmall.feature.goods.component.FilterDialog
 import com.joker.coolmall.feature.goods.model.SortState
 import com.joker.coolmall.feature.goods.model.SortType
+import com.joker.coolmall.feature.goods.skeleton.GoodsCategoryLoadingSkeleton
 import com.joker.coolmall.feature.goods.viewmodel.GoodsCategoryViewModel
 import com.joker.coolmall.core.ui.R as CoreUiR
 
@@ -232,7 +233,10 @@ internal fun GoodsCategoryScreen(
     ) {
         BaseNetWorkListView(
             uiState = uiState,
-            onRetry = onRetry
+            onRetry = onRetry,
+            customLoading = {
+                GoodsCategoryLoadingSkeleton()
+            }
         ) {
             GoodsCategoryContentView(
                 data = listData,

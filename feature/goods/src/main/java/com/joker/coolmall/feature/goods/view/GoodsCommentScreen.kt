@@ -17,6 +17,7 @@ import com.joker.coolmall.core.ui.component.refresh.RefreshLayout
 import com.joker.coolmall.core.ui.component.scaffold.AppScaffold
 import com.joker.coolmall.feature.goods.R
 import com.joker.coolmall.feature.goods.component.CommentCard
+import com.joker.coolmall.feature.goods.skeleton.GoodsCommentLoadingSkeleton
 import com.joker.coolmall.feature.goods.viewmodel.GoodsCommentViewModel
 
 /**
@@ -87,7 +88,10 @@ internal fun GoodsCommentScreen(
     ) {
         BaseNetWorkListView(
             uiState = uiState,
-            onRetry = onRetry
+            onRetry = onRetry,
+            customLoading = {
+                GoodsCommentLoadingSkeleton()
+            }
         ) {
             GoodsCommentContentView(
                 data = listData,

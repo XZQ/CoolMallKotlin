@@ -86,6 +86,11 @@ class GoodsCategoryViewModel @AssistedInject constructor(
     val currentSortState: StateFlow<SortState> = _currentSortState
 
     /**
+     * 启用最少加载时间
+     */
+    override val enableMinLoadingTime: Boolean = true
+
+    /**
      * 搜索关键词
      */
     private var searchKeyword = ""

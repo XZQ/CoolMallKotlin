@@ -1,7 +1,9 @@
 package com.joker.coolmall.feature.common.view
 
+import android.os.Build
 import android.view.ViewGroup
 import android.webkit.WebView
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -17,6 +19,7 @@ import com.joker.coolmall.navigation.navigateBack
 import com.joker.coolmall.core.ui.component.network.BaseNetWorkView
 import com.joker.coolmall.core.ui.component.scaffold.AppScaffold
 import com.joker.coolmall.feature.common.R
+import com.joker.coolmall.feature.common.skeleton.DocumentLoadingSkeleton
 import com.joker.coolmall.feature.common.viewmodel.PrivacyPolicyViewModel
 
 /**
@@ -25,6 +28,7 @@ import com.joker.coolmall.feature.common.viewmodel.PrivacyPolicyViewModel
  * @param viewModel 隐私政策 ViewModel
  * @author Joker.X
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 internal fun PrivacyPolicyRoute(
     viewModel: PrivacyPolicyViewModel = hiltViewModel()
@@ -45,6 +49,7 @@ internal fun PrivacyPolicyRoute(
  * @param onRetry 重试请求回调
  * @author Joker.X
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun PrivacyPolicyScreen(
@@ -57,7 +62,10 @@ internal fun PrivacyPolicyScreen(
     ) {
         BaseNetWorkView(
             uiState = uiState,
-            onRetry = onRetry
+            onRetry = onRetry,
+            customLoading = {
+                DocumentLoadingSkeleton()
+            },
         ) { html ->
             PrivacyPolicyContentView(html = html)
         }
@@ -70,6 +78,7 @@ internal fun PrivacyPolicyScreen(
  * @param html HTML 富文本内容
  * @author Joker.X
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun PrivacyPolicyContentView(html: String) {
     AndroidView(
@@ -114,6 +123,7 @@ private fun PrivacyPolicyContentView(html: String) {
  *
  * @author Joker.X
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 internal fun PrivacyPolicyScreenPreview() {
@@ -131,6 +141,7 @@ internal fun PrivacyPolicyScreenPreview() {
  *
  * @author Joker.X
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 internal fun PrivacyPolicyScreenPreviewDark() {
